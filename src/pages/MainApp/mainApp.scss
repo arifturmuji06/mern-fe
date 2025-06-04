@@ -1,0 +1,103 @@
+.content {
+    margin-left: 250px; /* Sesuaikan dengan lebar sidebar */
+    padding: 20px;
+  }
+
+ /* Dashboard.css */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.content-container {
+  // width: auto;
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+}
+.content-container {
+  margin-left: 250px; /* Geser konten sejajar dengan sidebar */
+  padding: 20px;
+  background-color: #f8f9fa;
+  overflow-x: auto;
+}
+
+.mutasi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #ffffff;
+  padding: 20px;
+  padding-left: 40px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.mutasi-header {
+  height: 100%;
+}
+
+.mutasi-header {
+  background-color: #f8f9fa;
+    // padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.mutasi-header .rekening-info h5,
+.mutasi-header .periode-info p {
+  margin: 0 0 10px;
+}
+
+.mutasi-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.download-section .btn, .action-section .btn {
+  margin-right: 10px;
+}
+.profile-info td {
+    background-color: #ffffff !important; 
+}
+.periode-info td {
+  background-color: #f8f9fa;
+  border: none;
+}
+
+.periode-info {
+  font-size: 20px;
+  height: 100%;
+}
+
+.periode-info tr {height: 50px;}
+
+.periode-info table {
+  margin: 0;
+  height: 100%;
+}
+
+.th-aksi,
+.td-aksi {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+}
+td.devider {
+  padding-left: 100px;
+}
+
+.rekening-card {
+  background-color: #fff; /* Latar putih seperti kartu */
+  border: 1px solid #ddd; /* Border tipis */
+  border-radius: 8px; /* Sudut membulat */
+  padding: 16px; /* Ruang di dalam elemen */
+  margin-bottom: 16px; /* Jarak antar elemen */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow untuk efek mengangkat */
+}
+

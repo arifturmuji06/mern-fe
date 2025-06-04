@@ -1,0 +1,114 @@
+// .content {
+//     margin-left: 250px; /* Sesuaikan dengan lebar sidebar */
+//     padding: 20px;
+//   }
+
+//  /* Dashboard.css */
+// .dashboard-container {
+//   display: flex;
+//   min-height: 100vh;
+// }
+
+// .content-container {
+//   flex-grow: 1;
+//   padding: 20px;
+//   background-color: #f8f9fa;
+//   overflow-y: auto;
+// }
+// .content-container {
+//   margin-left: 250px; /* Geser konten sejajar dengan sidebar */
+//   padding: 20px;
+//   background-color: #f8f9fa;
+//   overflow-x: auto;
+// }
+
+// .mutasi-header {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: flex-start;
+//   background-color: #ffffff;
+//   padding: 20px;
+//   border: 1px solid #ddd;
+//   border-radius: 8px;
+// }
+
+// .mutasi-header {
+//   background-color: #f8f9fa;
+//     padding: 2rem;
+//     border-radius: 10px;
+//     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+// }
+
+
+
+// .mutasi-header .rekening-info h5,
+// .mutasi-header .periode-info p {
+//   margin: 0 0 10px;
+// }
+
+// .mutasi-container {
+//   background-color: #ffffff;
+//   padding: 20px;
+//   border-radius: 8px;
+//   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+// }
+
+// .download-section .btn {
+//   margin-right: 10px;
+// }
+
+// .periode-info td {
+//   padding-top: 0 !important;
+//   background-color: #f8f9fa !important;
+//   border: none;
+// }
+
+// .rekening-card {
+//   background-color: #fff; /* Latar putih seperti kartu */
+//   border: 1px solid #ddd; /* Border tipis */
+//   border-radius: 8px; /* Sudut membulat */
+//   padding: 16px; /* Ruang di dalam elemen */
+//   margin-bottom: 16px; /* Jarak antar elemen */
+//   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow untuk efek mengangkat */
+// }
+
+.mutasi-header.budget-card {
+    padding: 10px 2rem 10px;
+    height: 110px;
+    // width: 80%;
+}
+
+.mutasi-header.budget-card p {
+    margin: unset;
+}
+
+.mutasi-header.budget-card.conference-card {
+    background-color: #a9dbf1;
+}
+.mutasi-header.budget-card.nutrition-card {
+    background-color: #88ECA5;
+}
+.mutasi-header.budget-card.book-card {
+    background-color: #e5c99e;
+}
+
+.akses-cepat {
+    width: 100%;
+}
+
+.mutasi-container.sub-mutasi-container {
+    height: 100%;
+}
+
+.image-holder {
+    display: flex;
+    justify-content: center;   // horizontal center
+    align-items: center;       // vertical center
+    height: 100px;             // adjust based on your table row height
+    width: 100%;               // optional, ensures full width
+  }
+
+.image-holder {
+    width: 90px;
+    height: 100px;
+}

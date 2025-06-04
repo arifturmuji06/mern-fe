@@ -1,0 +1,73 @@
+/* Sidebar.css */
+// .sidebar {
+//     height: 100vh;
+//     width: 250px;
+//     position: fixed;
+//     top: 0;
+//     left: 0;
+//     background-color: #f8f9fa;
+//     padding: 20px;
+//   }
+  
+//   .sidebar .nav-link {
+//     margin: 10px 0;
+//   }
+  
+.sidebar {
+  height: 100vh;
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #ffffff; /* Warna putih terang */
+  color: #343a40; /* Warna teks gelap */
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #dee2e6; /* Garis pembatas di sebelah kanan */
+}
+
+.sidebar-logo {
+  width: 100px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.sidebar .nav-link {
+    color: #6c757d; /* Warna abu-abu netral */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    text-transform: uppercase;
+    padding: 10px 0;
+    transition: color 0.3s, transform 0.2s;
+  }
+  
+  .sidebar .nav-link:hover {
+    color: #ff5722; /* Warna oranye terang saat hover */
+    transform: translateX(5px);
+    text-decoration: none;
+  }
+
+  /* Warna link saat active */
+.sidebar .nav-link.active {
+  color: #ff5722; /* Warna oranye terang untuk link aktif */
+  font-weight: 600; /* Tebalkan font untuk link aktif */
+  border-left: 4px solid #6c757d; /* Garis kiri untuk menandai link aktif */
+  padding-left: 8px; /* Beri jarak agar tidak terlalu dekat dengan garis */
+}
+
+/* Fokus untuk aksesibilitas */
+.sidebar .nav-link:focus {
+  outline: none;
+  color: #ff5722;
+}
+
+a.sidebar-link-sub.nav-link {
+    margin-left: 16px;
+}
+
+.sidebar-copyright {
+  font-size: 0.8rem;
+  color: #6c757d; /* Warna abu-abu untuk teks copyright */
+}
