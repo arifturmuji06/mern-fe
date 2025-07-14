@@ -25,6 +25,16 @@ table.table.profile-info {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.table-wrapper {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden; /* 🔒 ensures corners are clipped */
+}
+
+table.table.profile-info td {
+    background-color: #f8f9fa !important;
+}
+
 .mutasi-header.profile-header {
     display: flex;
     flex-direction: column;

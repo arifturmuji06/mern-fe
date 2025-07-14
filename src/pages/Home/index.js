@@ -1,7 +1,6 @@
 import React from "react";
 import { Gap } from "../../components";
 import { Row, Col, Button, Dropdown, Pagination } from "react-bootstrap";
-
 import Icon from "../../assets/icon/Index";
 import "./home.scss";
 import "bootstrap/dist/css/bootstrap.min.css";

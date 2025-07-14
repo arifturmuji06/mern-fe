@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Gap, Input } from "../../components";
+import { Gap, Input, AtomButton } from "../../components";
 import {
   Button,
   Dropdown,
@@ -295,13 +295,14 @@ const Remunerasi = () => {
           </Col>
           <Col xs={6} md={8}>
             <div className="d-flex align-items-center justify-content download-section">
-              <Button
+              <AtomButton
+                label="Tambah Data Remunerasi"
+                to="/remunerasi-add"
+                icon="UserPlus"
+                iconPosition="start"
                 variant="secondary"
                 className="d-flex align-items-center print-button"
-              >
-                <Icon name="UserPlus" size="16" className="me-2" /> Tambah Data
-                Remunerasi
-              </Button>
+              />
               <span className="me-2">Pilih Format File:</span>
               <Dropdown className="me-3">
                 <Dropdown.Toggle variant="light" id="dropdown-basic">

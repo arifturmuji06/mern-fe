@@ -15,6 +15,7 @@ import Sidebar from "../../components/layouts/Sidebar/sidebar";
 import "./mainApp.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddRemunerasi from "../AddRemunerasi";
+import AddEmployee from "../AddEmployee";
 
 const MainApp = () => {
   const location = useLocation();
@@ -82,6 +83,7 @@ const MainApp = () => {
       <Routes>
         <Route path="profile" element={<Profile />} />
         <Route path="employee" element={<Employee />} />
+        <Route path="employee-add" element={<AddEmployee />} />
         <Route path="remunerasi" element={<Remunerasi />} />
         <Route path="remunerasi-book" element={<Book />} />
         <Route path="remunerasi-conference" element={<Conference />} />

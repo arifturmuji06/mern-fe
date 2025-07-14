@@ -4,8 +4,10 @@ import { CompanyLogo } from "../../assets";
 import { Gap, Input, AtomButton } from "../../components";
 import { Container, Row, Col, Form, Image } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   return (
     <div className="">
       <header className=""></header>
@@ -27,7 +29,12 @@ const Login = () => {
               <Input label="Password" placeholder="Password" />
               <Gap height={30} />
               <div className="d-flex justify-content-center">
-                <AtomButton label="login" href="login" />
+                <AtomButton
+                  label="login"
+                  onClick={() => navigate("/")}
+                  className="d-flex align-items-center view-button"
+                />
+                {/* <AtomButton label="login" href="login" /> */}
               </div>
             </Form>
           </Col>

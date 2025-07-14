@@ -12,6 +12,7 @@ import {
   Nutrition,
   History,
   AddRemunerasi,
+  AddEmployee,
 } from "../../pages";
 
 const AppRoutes = () => {
@@ -22,6 +23,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<MainApp />}>
           <Route path="/employee" element={<Employee />} />
+          <Route path="/employee-add" element={<AddEmployee />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/remunerasi" element={<Remunerasi />} />
           <Route path="/remunerasi-book" element={<Book />} />

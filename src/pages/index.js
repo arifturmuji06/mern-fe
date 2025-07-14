@@ -9,6 +9,7 @@ import Conference from "./Conference";
 import Nutrition from "./Nutrition";
 import History from "./History";
 import AddRemunerasi from "./AddRemunerasi";
+import AddEmployee from "./AddEmployee";
 import MainApp from "./MainApp";
 
 export {
@@ -23,5 +24,6 @@ export {
   Nutrition,
   History,
   AddRemunerasi,
+  AddEmployee,
   MainApp,
 };

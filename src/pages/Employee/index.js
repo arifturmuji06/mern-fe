@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Gap, Input } from "../../components";
+import { Gap, Input, AtomButton } from "../../components";
 import { Button, Dropdown, Form, Row, Col, Pagination } from "react-bootstrap";
 import Icon from "../../assets/icon/Index";
 import "./employee.scss";
@@ -7,7 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const Employee = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 5;
   const employeeData = [
     {
       id: 1,
@@ -104,13 +104,14 @@ const Employee = () => {
           </Col>
           <Col xs={6} md={8}>
             <div className="d-flex align-items-center justify-content download-section">
-              <Button
+              <AtomButton
+                label="Tambah Karyawan"
+                to="/employee-add"
+                icon="UserPlus"
+                iconPosition="start"
                 variant="primary"
                 className="d-flex align-items-center print-button"
-              >
-                <Icon name="UserPlus" size="16" className="me-2" /> Tambah
-                Karyawan
-              </Button>
+              />
               <span className="me-2">Pilih Format File:</span>
               <Dropdown className="me-3">
                 <Dropdown.Toggle variant="light" id="dropdown-basic">
