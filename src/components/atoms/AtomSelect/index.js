@@ -1,9 +1,9 @@
 import React from "react";
 import { Form } from "react-bootstrap";
 
-const AtomSelect = ({ label, name, value, onChange, options }) => {
+const AtomSelect = ({ label, name, value, onChange, options, className }) => {
   return (
-    <Form.Group className="mb-3">
+    <Form.Group className={`mb-3 ${className}`}>
       <Form.Label>{label}</Form.Label>
       <Form.Select name={name} value={value} onChange={onChange}>
         {options.map((opt, index) => (

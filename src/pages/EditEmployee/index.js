@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Gap, Input, AtomButton, AtomSelect } from "../../components";
 import { Form, Row, Col, Alert } from "react-bootstrap";
-
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { fetchKaryawanById } from "../../services/Api";
 
-const AddEmployee = () => {
+const EditEmployee = () => {
   const { user, token, loading } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const [formData, setFormData] = useState({
+    nama: "",
+    departemen: "",
+    jabatan: "",
+    kontak: "",
+    tahunMasuk: "",
+    profilePicture: null,
+  });
+
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -16,20 +28,29 @@ const AddEmployee = () => {
     if (user.role !== "admin") {
       navigate("/profile", { replace: true });
     }
-  }, [loading, user, navigate]);
 
-  const [formData, setFormData] = useState({
-    nama: "",
-    email: "",
-    departemen: "",
-    jabatan: "",
-    kontak: "",
-    tahunMasuk: "",
-    profilePicture: null,
-    password: "abcdefghij",
-  });
+    const fetchData = async () => {
+      try {
+        const userDataRes = await fetchKaryawanById(id);
+        const userData = userDataRes.data.data;
 
-  const [showAlert, setShowAlert] = useState(false);
+        setFormData({
+          nama: userData.nama || "",
+          departemen: userData.departemen || "",
+          jabatan: userData.jabatan || "",
+          kontak: userData.kontak || "",
+          tahunMasuk: userData.tahunMasuk
+            ? userData.tahunMasuk.split("T")[0]
+            : "",
+          profilePicture: null,
+        });
+      } catch (err) {
+        console.error("Gagal mengambil data profil:", err);
+      }
+    };
+
+    fetchData();
+  }, [loading, user, navigate, id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,22 +74,19 @@ const AddEmployee = () => {
     try {
       const data = new FormData();
       data.append("nama", formData.nama);
-      data.append("email", formData.email);
       data.append("departemen", formData.departemen);
       data.append("jabatan", formData.jabatan);
       data.append("kontak", formData.kontak);
       data.append("tahunMasuk", formData.tahunMasuk);
-      data.append("password", formData.password);
 
       if (formData.profilePicture) {
         data.append("profilePicture", formData.profilePicture);
       }
 
       const res = await fetch(
-        // "http://localhost:4000/v1/users/tambah-karyawan",
-        "https://remunerasi-api.onrender.com/v1/users/tambah-karyawan",
+        `https://remunerasi-api.onrender.com/v1/users/${id}`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -77,16 +95,13 @@ const AddEmployee = () => {
       );
 
       const resData = await res.json();
-
-      if (!res.ok)
-        throw new Error(resData.message || "Gagal membuat remunerasi");
+      if (!res.ok) throw new Error(resData.message || "Gagal update data");
 
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
         navigate("/employee");
-      }, 3000);
-      console.log(formData);
+      }, 2000);
     } catch (err) {
       alert("❌ Gagal submit data: " + err.message);
       console.error(err);
@@ -96,7 +111,7 @@ const AddEmployee = () => {
   return (
     <div className="content-container">
       <div className="mutasi-container">
-        <h2>Tambah Data Karyawan</h2>
+        <h2>Rubah Data Karyawan</h2>
         <AtomButton
           to="/employee"
           icon="SquareArrowLeft"
@@ -107,9 +122,7 @@ const AddEmployee = () => {
 
         <Gap height={20} />
 
-        {showAlert && (
-          <Alert variant="success">🎉 Data berhasil ditambahkan!</Alert>
-        )}
+        {showAlert && <Alert variant="success">🎉 Data berhasil diubah!</Alert>}
 
         <Form onSubmit={handleSubmit}>
           <Input
@@ -119,20 +132,12 @@ const AddEmployee = () => {
             name="nama"
             onChange={handleChange}
           />
-          <Input
-            label="Email"
-            placeholder="karyawan@email.com"
-            value={formData.email}
-            name="email"
-            onChange={handleChange}
-          />
-
           <Row>
             <Col md={4}>
               <AtomSelect
                 label="Departemen"
                 name="departemen"
-                value={formData.pemohon}
+                value={formData.departemen}
                 onChange={handleChange}
                 options={[
                   { value: "", label: "##Departemen##" },
@@ -200,7 +205,7 @@ const AddEmployee = () => {
           <Gap height={30} />
 
           <div className="d-flex justify-content-center">
-            <AtomButton label="Tambah Data Karyawan" type="submit" />
+            <AtomButton label="Simpan Perubahan" type="submit" />
           </div>
         </Form>
       </div>
@@ -208,4 +213,4 @@ const AddEmployee = () => {
   );
 };
 
-export default AddEmployee;
+export default EditEmployee;

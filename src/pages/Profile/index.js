@@ -1,27 +1,130 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Gap } from "../../components";
 import { Row, Col, Button, Pagination, Image } from "react-bootstrap";
 import "./profile.scss";
-
 import Icon from "../../assets/icon/Index";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import {
+  fetchCardSummaryById,
+  fetchMyCardSummary,
+  fetchAllRemunByUserId,
+  fetchMyRemun,
+  fetchMe,
+  fetchKaryawanById,
+} from "../../services/Api";
 
 const Profile = () => {
+  const { user, loading } = useAuth();
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [cardSummary, setCardSummary] = useState(null);
+  const [remunTerbaru, setRemunTerbaru] = useState([]);
+  const [dataUser, setDataUser] = useState([]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const currentYear = new Date().getFullYear();
+
+    if (id && user?.role !== "admin") {
+      navigate("/profile", { replace: true });
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        let summaryRes, terbaruRes, userDataRes;
+        if (id) {
+          summaryRes = await fetchCardSummaryById(id, currentYear);
+          terbaruRes = await fetchAllRemunByUserId(id, currentYear);
+          userDataRes = await fetchKaryawanById(id);
+        } else {
+          summaryRes = await fetchMyCardSummary(currentYear);
+          terbaruRes = await fetchMyRemun(currentYear);
+          userDataRes = await fetchMe();
+        }
+
+        setCardSummary(summaryRes.data);
+        setRemunTerbaru(terbaruRes.data.data);
+        setDataUser(userDataRes.data);
+      } catch (err) {
+        console.error("Gagal mengambil data profil:", err);
+      }
+    };
+
+    fetchData();
+  }, [id, user, loading, navigate]);
+
+  // Render cardSummary
+  const {
+    data: {
+      periode,
+      nama,
+      totalAlokasiAnggaran,
+      totalPenggunaanAnggaran,
+      saldoRiilAwalPeriode,
+      saldoRiilAkhirPeriode,
+      perKategori: { penggunaan = {}, sisa = {} } = {},
+    } = {},
+  } = cardSummary || {};
+
+  let userDetail = {};
+
+  if (id) {
+    userDetail = dataUser?.data || {};
+  } else {
+    userDetail = dataUser?.data?.[0] || {};
+  }
+
+  const {
+    nama: namaUser,
+    email,
+    role,
+    status,
+    departemen,
+    jabatan,
+    kontak,
+    tahunMasuk,
+    profilePicture,
+  } = userDetail;
+
+  // Render remunTerbaru
+  const allRemunerations = remunTerbaru.map((item) => ({
+    ...item,
+    id: item._id,
+    namaBarang: item.nama,
+    jenis: item.jenis,
+    jumlah: item.jumlah,
+    keterangan: item.keterangan,
+    tanggalPembelian: new Date(item.tanggalPembelian).toLocaleDateString(
+      "id-ID"
+    ),
+    pemohon: item.pemohon || "-",
+    gambar: item.gambar,
+  }));
+
+  if (loading) return null;
+
   return (
     <div className="content-container">
       <div className="mutasi-container">
         <h2 className="mb-4">Profile Karyawan</h2>
-        {/* <div className="mutasi-header profile-header"> */}
         <div className="periode-info profile-info">
           <div className="table-wrapper">
             <table className="table profile-info">
-              {/* <h4 className="m-2">Profile</h4> */}
               <tbody>
                 <tr>
                   <td rowSpan="6" className="td-aksi">
                     <div className="image-holder-profile d-flex justify-items-center align-center">
                       <Image
-                        src="https://placehold.co/300x400?text=Hello\nWorld"
+                        src={
+                          `https://remunerasi-api.onrender.com/${profilePicture}` ||
+                          "https://placehold.co/300x400?text=Hello\nWorld"
+                        }
                         fluid
                       />
                     </div>
@@ -29,132 +132,115 @@ const Profile = () => {
                   <td>Nama</td>
                   <td className="devider">:</td>
                   <td>
-                    <strong>Arif Turmuji</strong>
+                    <strong>{namaUser}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td>Departemen</td>
                   <td className="devider">:</td>
                   <td>
-                    <strong>IT</strong>
+                    <strong>{departemen || "-"}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td>Jabatan</td>
                   <td className="devider">:</td>
                   <td>
-                    <strong>Senior Front End Developer</strong>
+                    <strong>{jabatan || "-"}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td>Email</td>
                   <td className="devider">:</td>
                   <td>
-                    <strong>arifturmuji@gmail.com</strong>
+                    <strong>{email || "-"}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td>Kontak</td>
                   <td className="devider">:</td>
                   <td>
-                    <strong>082-3456-7890</strong>
+                    <strong>{kontak || "-"}</strong>
                   </td>
                 </tr>
                 <tr>
                   <td>Tahun Masuk</td>
                   <td className="devider">:</td>
                   <td>
-                    <strong>6/15/2018</strong>
+                    <strong>
+                      {new Date(tahunMasuk).toLocaleDateString("id-ID") || "-"}
+                    </strong>
+                    {}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-        {/* <Gap height={20} /> */}
-        {/* <div> */}
-        {/* <h4>Pengguunaan Budget 2025</h4>
-          <Gap height={20} />
-          <Row>
-            <Col md={4}>
-              <div className="mutasi-header budget-card profile-card conference-card">
-                <div className="rekening-info">
-                  <h6>Conference Budget</h6>
-                  <h5>
-                    <strong>Rp2.000.000,00</strong>
-                  </h5>
-                  <p>Saldo : Rp3.000.000,00</p>
-                </div>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="mutasi-header budget-card profile-card nutrition-card">
-                <div className="rekening-info">
-                  <h6>Nutrition Budget</h6>
-                  <h5>
-                    <strong>Rp3.250.000,00</strong>
-                  </h5>
-                  <p>Saldo : Rp2.750.000,00</p>
-                </div>
-              </div>
-            </Col>
-            <Col md={4}>
-              <div className="mutasi-header budget-card profile-card book-card">
-                <div className="rekening-info">
-                  <h6>Book Budget</h6>
-                  <h5>
-                    <strong>Rp0,00</strong>
-                  </h5>
-                  <p>Saldo : Rp2.500.000,00</p>
-                </div>
-              </div>
-            </Col>
-          </Row> */}
-        {/* </div> */}
-        {/* </div> */}
       </div>
       <Gap height={20} />
       <div className="mutasi-container">
-        <h2 className="mb-4">Penggunaan Anggaran 2025</h2>
+        <h2 className="mb-4">Penggunaan Anggaran {periode}</h2>
         <Row>
-          {/* <Row>
-          <Col md={4}> */}
           <Col md={3}>
             <div className="mutasi-header budget-card conference-card">
               <div className="rekening-info">
                 <h6>Conference Budget</h6>
                 <h4>
-                  <strong>Rp. 13.500.000</strong>
+                  <strong>
+                    {penggunaan.conference
+                      ? `Rp. ${penggunaan.conference.toLocaleString("id-ID")}`
+                      : "-"}
+                  </strong>
                 </h4>
-                <p>Saldo : Rp. 51.500.000</p>
+                <p>
+                  Saldo:{" "}
+                  {sisa.sisaConference
+                    ? `Rp. ${sisa.sisaConference.toLocaleString("id-ID")}`
+                    : "-"}
+                </p>
               </div>
             </div>
             <Gap height={10} />
-            {/* </Col>
-          <Col md={4}> */}
             <div className="mutasi-header budget-card nutrition-card">
               <div className="rekening-info">
                 <h6>Nutrition Budget</h6>
                 <h4>
-                  <strong>Rp. 26.500.000</strong>
+                  <strong>
+                    {penggunaan.nutrition
+                      ? `Rp. ${penggunaan.nutrition.toLocaleString("id-ID")}`
+                      : "-"}
+                  </strong>
                 </h4>
-                <p>Saldo : Rp. 63.500.000</p>
+                <p>
+                  Saldo:{" "}
+                  {sisa.sisaNutrition
+                    ? `Rp. ${sisa.sisaNutrition.toLocaleString("id-ID")}`
+                    : "-"}
+                </p>
               </div>
             </div>
             <Gap height={10} />
-            {/* </Col>
-          <Col md={4}> */}
             <div className="mutasi-header budget-card book-card">
               <div className="rekening-info">
                 <h6>Book Budget</h6>
                 <h4>
-                  <strong>Rp. 2.300.000</strong>
+                  <strong>
+                    <strong>
+                      {penggunaan.book
+                        ? `Rp. ${penggunaan.book.toLocaleString("id-ID")}`
+                        : "-"}
+                    </strong>
+                  </strong>
                 </h4>
-                <p>Saldo : Rp. 35.200.000</p>
+                <p>
+                  Saldo:{" "}
+                  {sisa.sisaBook
+                    ? `Rp. ${sisa.sisaBook.toLocaleString("id-ID")}`
+                    : "-"}
+                </p>
               </div>
             </div>
-            {/* </Col>
-        </Row> */}
           </Col>
           <Col md={9}>
             <div className="mutasi-header">
@@ -165,62 +251,70 @@ const Profile = () => {
                       <td>Tahun Periode</td>
                       <td className="devider">:</td>
                       <td>
-                        <strong>2025</strong>
+                        <strong>{periode}</strong>
                       </td>
                     </tr>
                     <tr>
                       <td>Nama Karyawan</td>
                       <td className="devider">:</td>
                       <td>
-                        <strong>Arif Turmuji</strong>
+                        <strong>{nama}</strong>
                       </td>
                     </tr>
                     <tr>
                       <td>Total Remunerasi</td>
                       <td className="devider">:</td>
                       <td>
-                        <strong>Rp202.500.000,00</strong>
+                        <strong>
+                          {totalAlokasiAnggaran
+                            ? `Rp. ${totalAlokasiAnggaran.toLocaleString(
+                                "id-ID"
+                              )}`
+                            : "-"}
+                        </strong>
                       </td>
                     </tr>
                     <tr>
                       <td>Total Penggunaan</td>
                       <td className="devider">:</td>
                       <td>
-                        <strong>00.00</strong>
+                        <strong>
+                          {totalPenggunaanAnggaran
+                            ? `Rp. ${totalPenggunaanAnggaran.toLocaleString(
+                                "id-ID"
+                              )}`
+                            : "-"}
+                        </strong>
                       </td>
                     </tr>
                     <tr>
-                      <td>Saldo riil awal per 1-12-2025</td>
+                      <td>Saldo riil awal per 01-01-2025</td>
                       <td className="devider">:</td>
                       <td>
-                        <strong>Rp202.500.000,00</strong>
+                        <strong>
+                          {saldoRiilAwalPeriode
+                            ? `Rp. ${saldoRiilAwalPeriode.toLocaleString(
+                                "id-ID"
+                              )}`
+                            : "-"}
+                        </strong>
                       </td>
                     </tr>
                     <tr>
                       <td>Saldo riil akhir per 31-12-2025</td>
                       <td className="devider">:</td>
                       <td>
-                        <strong>Rp160.200.000,00</strong>
+                        <strong>
+                          {saldoRiilAkhirPeriode
+                            ? `Rp. ${saldoRiilAkhirPeriode.toLocaleString(
+                                "id-ID"
+                              )}`
+                            : "-"}
+                        </strong>
                       </td>
                     </tr>
                   </tbody>
                 </table>
-
-                {/* <p>
-                <strong>Periode</strong>: 22-12-2023 s/d 22-12-2023
-              </p>
-              <p>
-                <strong>Total Debet (Dalam Periode)</strong>: 1,200,000.00-
-              </p>
-              <p>
-                <strong>Total Kredit (Dalam Periode)</strong>: 0.00
-              </p>
-              <p>
-                <strong>Saldo riil awal per 22-12-2023</strong>: 960,480,789.00
-              </p>
-              <p>
-                <strong>Saldo riil akhir per 22-12-2023</strong>: 959,280,789.00
-              </p> */}
               </div>
             </div>
           </Col>
@@ -238,31 +332,21 @@ const Profile = () => {
                   <th>Tanggal</th>
                   <th>Nama Barang</th>
                   <th>Harga</th>
-                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>22-12-2023</td>
-                  <td>Harry Potter</td>
-                  <td>1,200,000.00-</td>
-                  <td>Approved</td>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>22-12-2023</td>
-                  <td>Harry Potter</td>
-                  <td>1,200,000.00-</td>
-                  <td>Approved</td>
-                </tr>
-                <tr>
-                  <td>1</td>
-                  <td>22-12-2023</td>
-                  <td>Harry Potter</td>
-                  <td>1,200,000.00-</td>
-                  <td>Approved</td>
-                </tr>
+                {allRemunerations.map((allRemun, index) => (
+                  <tr key={allRemun.id}>
+                    <td>{index + 1}</td>
+                    <td>{allRemun.tanggalPembelian}</td>
+                    <td>{allRemun.nama}</td>
+                    <td>
+                      {allRemun.jumlah
+                        ? `Rp. ${allRemun.jumlah.toLocaleString("id-ID")}`
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             <Row xs="auto">

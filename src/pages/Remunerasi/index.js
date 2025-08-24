@@ -1,23 +1,106 @@
-import React, { useState } from "react";
-import { Gap, Input, AtomButton } from "../../components";
+import React, { useEffect, useState } from "react";
+import { fetchMyRemun, fetchAllRemun } from "../../services/Api"; // ✅ pakai helper API
 import {
-  Button,
-  Dropdown,
-  Form,
-  Row,
-  Col,
-  Pagination,
-  Image,
-} from "react-bootstrap";
+  Gap,
+  Input,
+  AtomButton,
+  AtomSelect,
+  ExportButtons,
+} from "../../components";
+import { Button, Form, Row, Col, Pagination, Image } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Icon from "../../assets/icon/Index";
 import "./remunerasi.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Remunerasi = () => {
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const userRole = userData?.role;
+  const navigate = useNavigate();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFormat, setSelectedFormat] = useState("pdf");
+  const currentPeriod = new Date().getFullYear();
+
+  const [dataRemunerasi, setDataRemunerasi] = useState([]);
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+
+    const fetchData = async () => {
+      try {
+        const response =
+          userRole === "admin"
+            ? await fetchAllRemun(currentYear)
+            : await fetchMyRemun(currentYear);
+
+        setDataRemunerasi(response.data.data);
+      } catch (err) {
+        console.error("Gagal ambil data remunerasi:", err);
+      }
+    };
+
+    fetchData();
+  }, [userRole]);
+
+  // Render Remunerasi
+  const allRemunerations = dataRemunerasi.map((item) => ({
+    ...item,
+    employeeName: item.pemohon.nama || "—",
+    date: item.tanggalPembelian,
+    product: item.nama,
+    price: item.jumlah,
+    category: item.jenis,
+    periode: item.periode,
+  }));
+
+  // Filter by Nama atau Email
+  const filteredRemunerasi = allRemunerations.filter((rem) => {
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      rem.nama.toLowerCase().includes(lowerSearch) ||
+      rem.pemohon.nama.toLowerCase().includes(lowerSearch) ||
+      rem.jenis.toLowerCase().includes(lowerSearch)
+    );
+  });
+
   const [sortConfig, setSortConfig] = useState({
     key: "date",
     direction: "desc",
   });
+
+  // Sort logic
+  const sortedRemunerations = [...filteredRemunerasi].sort((a, b) => {
+    const valA = a[sortConfig.key];
+    const valB = b[sortConfig.key];
+
+    if (sortConfig.key === "date") {
+      return sortConfig.direction === "asc"
+        ? new Date(valA) - new Date(valB)
+        : new Date(valB) - new Date(valA);
+    }
+
+    if (typeof valA === "string") {
+      return sortConfig.direction === "asc"
+        ? valA.localeCompare(valB)
+        : valB.localeCompare(valA);
+    } else {
+      return sortConfig.direction === "asc" ? valA - valB : valB - valA;
+    }
+  });
+
+  // Pagination logic
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedRemunerations.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(sortedRemunerations.length / itemsPerPage);
+
+  // Sorting button click
   const handleSort = (key) => {
     let direction = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -26,270 +109,37 @@ const Remunerasi = () => {
     setSortConfig({ key, direction });
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-  const employeeData = [
-    {
-      id: 1,
-      name: "Rahmat Hidayatullah",
-      email: "rahmathi@gmail.com",
-      position: "Software Engineer",
-      unit: "IT",
-      remuneration: [
-        {
-          productId: 1,
-          date: "2025-1-24",
-          product: "Edensor",
-          img: "edensor",
-          category: "Book",
-          price: 98000,
-          desc: "Pembelian buku buulan Januari",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 2,
-          date: "2025-2-16",
-          product: "Berobat",
-          img: "surat-dokter",
-          category: "Nutrition",
-          price: 100000,
-          desc: "Checkup ke klinik, gejala pusing dan mual",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 3,
-          date: "2025-2-16",
-          product: "Madu Hutan Badui",
-          img: "madu-hutan-badui",
-          category: "Nutrition",
-          price: 150000,
-          desc: "Pembelian madu hutan untuk kesehatan",
-          attachment: "http://",
-          status: "Pending",
-        },
-        {
-          productId: 4,
-          date: "2025-2-18",
-          product: "MERN Stack Course",
-          img: "mern-course",
-          category: "Conference",
-          price: 299000,
-          desc: "Pembelian paket pembelajaran MERN Stack",
-          attachment: "http://",
-          status: "Need Approval",
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "Arif Turmuji",
-      email: "arifturmuji@gmail.com",
-      position: "Software Engineer",
-      unit: "IT",
-      remuneration: [
-        {
-          productId: 1,
-          date: "2025-1-24",
-          product: "Edensor",
-          img: "edensor",
-          category: "Book",
-          price: 98000,
-          desc: "Pembelian buku buulan Januari",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 2,
-          date: "2025-2-16",
-          product: "Berobat",
-          img: "surat-dokter",
-          category: "Nutrition",
-          price: 100000,
-          desc: "Checkup ke klinik, gejala pusing dan mual",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 3,
-          date: "2025-2-16",
-          product: "Madu Hutan Badui",
-          img: "madu-hutan-badui",
-          category: "Nutrition",
-          price: 150000,
-          desc: "Pembelian madu hutan untuk kesehatan",
-          attachment: "http://",
-          status: "Pending",
-        },
-        {
-          productId: 4,
-          date: "2025-2-18",
-          product: "MERN Stack Course",
-          img: "mern-course",
-          category: "Conference",
-          price: 299000,
-          desc: "Pembelian paket pembelajaran MERN Stack",
-          attachment: "http://",
-          status: "Need Approval",
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: "Meri Kurnia",
-      email: "merikurnia@gmail.com",
-      position: "Software Engineer",
-      unit: "IT",
-      remuneration: [
-        {
-          productId: 1,
-          date: "2025-1-24",
-          product: "Edensor",
-          img: "edensor",
-          category: "Book",
-          price: 98000,
-          desc: "Pembelian buku buulan Januari",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 2,
-          date: "2025-2-16",
-          product: "Berobat",
-          img: "surat-dokter",
-          category: "Nutrition",
-          price: 100000,
-          desc: "Checkup ke klinik, gejala pusing dan mual",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 3,
-          date: "2025-2-16",
-          product: "Madu Hutan Badui",
-          img: "madu-hutan-badui",
-          category: "Nutrition",
-          price: 150000,
-          desc: "Pembelian madu hutan untuk kesehatan",
-          attachment: "http://",
-          status: "Pending",
-        },
-        {
-          productId: 4,
-          date: "2025-2-18",
-          product: "MERN Stack Course",
-          img: "mern-course",
-          category: "Conference",
-          price: 299000,
-          desc: "Pembelian paket pembelajaran MERN Stack",
-          attachment: "http://",
-          status: "Need Approval",
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: "Anisa Fauziah",
-      email: "anisafa@gmail.com",
-      position: "Software Engineer",
-      unit: "IT",
-      remuneration: [
-        {
-          productId: 1,
-          date: "2025-1-24",
-          product: "Edensor",
-          img: "edensor",
-          category: "Book",
-          price: 98000,
-          desc: "Pembelian buku buulan Januari",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 2,
-          date: "2025-2-16",
-          product: "Berobat",
-          img: "surat-dokter",
-          category: "Nutrition",
-          price: 100000,
-          desc: "Checkup ke klinik, gejala pusing dan mual",
-          attachment: "http://",
-          status: "Finish",
-        },
-        {
-          productId: 3,
-          date: "2025-2-16",
-          product: "Madu Hutan Badui",
-          img: "madu-hutan-badui",
-          category: "Nutrition",
-          price: 150000,
-          desc: "Pembelian madu hutan untuk kesehatan",
-          attachment: "http://",
-          status: "Pending",
-        },
-        {
-          productId: 4,
-          date: "2025-2-18",
-          product: "MERN Stack Course",
-          img: "mern-course",
-          category: "Conference",
-          price: 299000,
-          desc: "Pembelian paket pembelajaran MERN Stack",
-          attachment: "http://",
-          status: "Need Approval",
-        },
-      ],
-    },
-  ];
-  // Pagination logic
-  let allRemunerations = employeeData.flatMap((employee) =>
-    employee.remuneration.map((item) => ({
-      ...item,
-      employeeName: employee.name,
-    }))
-  );
+  const handleDelete = async (id, nama) => {
+    if (window.confirm(`Anda ingin menghapus data remunerasi "${nama}" ini?`)) {
+      try {
+        const res = await axios.delete(
+          `https://remunerasi-api.onrender.com/v1/remunerasi/${id}`
+        );
+        alert(`Data remunerasi "${nama}" berhasil dihapus!`);
 
-  if (sortConfig.key) {
-    allRemunerations.sort((a, b) => {
-      const valA = a[sortConfig.key];
-      const valB = b[sortConfig.key];
-
-      if (sortConfig.key === "date") {
-        // Convert to timestamps for accurate comparison
-        return sortConfig.direction === "asc"
-          ? new Date(valA) - new Date(valB)
-          : new Date(valB) - new Date(valA);
+        setDataRemunerasi((prev) => prev.filter((item) => item._id !== id));
+      } catch (err) {
+        console.error("Gagal hapus remunerasi:", err);
+        alert("Gagal hapus data remunerasi!");
       }
-
-      if (typeof valA === "string") {
-        return sortConfig.direction === "asc"
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
-      } else {
-        return sortConfig.direction === "asc" ? valA - valB : valB - valA;
-      }
-    });
-  }
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = allRemunerations.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalPages = Math.ceil(allRemunerations.length / itemsPerPage);
+    }
+  };
 
   return (
     <div className="content-container">
       <div className="mutasi-container">
         <h2 className="mb-4">Remunerasi 2025</h2>
         <Gap height={40} />
+
         <Row>
           <Col xs={12} md={4}>
             <div>
               <Form className="">
-                <Input placeholder="🔍 Cari " />
+                <Input
+                  placeholder="🔍 Cari "
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </Form>
             </div>
           </Col>
@@ -303,22 +153,22 @@ const Remunerasi = () => {
                 variant="secondary"
                 className="d-flex align-items-center print-button"
               />
-              <span className="me-2">Pilih Format File:</span>
-              <Dropdown className="me-3">
-                <Dropdown.Toggle variant="light" id="dropdown-basic">
-                  *** Select ***
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item href="#/action-1">PDF</Dropdown.Item>
-                  <Dropdown.Item href="#/action-2">Excel</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-              <Button
-                variant="secondary"
-                className="d-flex align-items-center download-button"
-              >
-                <Icon name="Download" size="16" className="me-2" /> Download
-              </Button>
+              <AtomSelect
+                className="mb-0 inline-format"
+                label="Pilih Format:"
+                name="format"
+                value={selectedFormat}
+                onChange={(e) => setSelectedFormat(e.target.value)}
+                options={[
+                  { value: "pdf", label: "PDF" },
+                  { value: "excel", label: "Excel" },
+                ]}
+              />
+              <ExportButtons
+                periode={currentPeriod}
+                tipe="remunerasi"
+                format={selectedFormat}
+              />
             </div>
           </Col>
         </Row>
@@ -328,6 +178,7 @@ const Remunerasi = () => {
             <tr>
               <th>No</th>
               <th
+                className="td-aksi"
                 onClick={() => handleSort("date")}
                 style={{ cursor: "pointer" }}
               >
@@ -392,8 +243,8 @@ const Remunerasi = () => {
                 onClick={() => handleSort("status")}
                 style={{ cursor: "pointer" }}
               >
-                Status{" "}
-                {sortConfig.key === "status" ? (
+                Periode{" "}
+                {sortConfig.key === "periode" ? (
                   sortConfig.direction === "asc" ? (
                     <Icon name="ChevronUp" size="16" className="me-2" />
                   ) : (
@@ -424,38 +275,50 @@ const Remunerasi = () => {
 
           <tbody>
             {currentItems.map((item, index) => (
-              <tr key={index}>
+              <tr key={item._id}>
                 <td>{indexOfFirstItem + index + 1}</td>
-                <td>{item.date}</td>
+                <td className="td-aksi">
+                  {new Date(item.tanggalPembelian).toLocaleDateString("id-ID")}
+                </td>
                 <td className="td-aksi">
                   <div className="image-holder d-flex justify-items-center align-center">
                     <Image
-                      src="https://placehold.co/600x400?text=Hello\nWorld"
+                      src={`https://remunerasi-api.onrender.com/${item.gambar}`}
+                      alt={item.nama}
                       fluid
                     />
                   </div>
-
-                  {/* {item.img} */}
                 </td>
-                <td>{item.product}</td>
-                <td>{item.price}</td>
-                <td>{item.category}</td>
-                <td>{item.status}</td>
-                <td>{item.employeeName}</td>
+                <td>{item.nama}</td>
+                <td>
+                  {item.jumlah.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                  })}
+                </td>
+                <td>{item.jenis}</td>
+                <td>{item.periode}</td>
+                <td>{item.pemohon.nama}</td>
                 <td className="td-aksi">
                   <div className="d-flex align-items-center justify-content-center action-section">
-                    <Button variant="primary" className="view-button">
+                    <Button
+                      variant="primary"
+                      className="view-button"
+                      onClick={() => navigate(`/remunerasi/detail/${item._id}`)}
+                    >
                       <Icon name="Eye" size="16" className="me-2" /> View
                     </Button>
                     <Button
                       variant="warning"
                       className="d-flex align-items-center view-button"
+                      onClick={() => navigate(`/remunerasi/${item._id}`)}
                     >
                       <Icon name="Wrench" size="16" className="me-2" /> Edit
                     </Button>
                     <Button
                       variant="danger"
                       className="d-flex align-items-center view-button"
+                      onClick={() => handleDelete(item._id, item.nama)}
                     >
                       <Icon name="Trash" size="16" className="me-2" /> Delete
                     </Button>
@@ -465,6 +328,7 @@ const Remunerasi = () => {
             ))}
           </tbody>
         </table>
+
         <Pagination className="justify-content-center mt-4">
           <Pagination.First
             disabled={currentPage === 1}
@@ -498,10 +362,6 @@ const Remunerasi = () => {
         </Pagination>
       </div>
     </div>
-
-    // <div className="content-container">
-    //   <p>test di remunerasi</p>
-    // </div>
   );
 };
 

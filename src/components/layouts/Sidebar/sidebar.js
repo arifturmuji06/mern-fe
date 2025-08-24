@@ -1,10 +1,17 @@
-// Sidebar.js
 import React from "react";
 import { Nav, Image } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
 import "./sidebar.scss";
 
 const Sidebar = ({ items, CompanyLogo, copyrightText }) => {
+  const { user } = useAuth();
+
+  // Filter berdasarkan role user
+  const filteredItems = items.filter(
+    (item) => item.role === "all" || item.role === user?.role
+  );
+
   return (
     <div className="sidebar d-flex flex-column justify-content-between">
       <div>
@@ -15,17 +22,28 @@ const Sidebar = ({ items, CompanyLogo, copyrightText }) => {
 
         {/* Menu Items */}
         <Nav className="flex-column">
-          {items.map((item, index) => (
-            <NavLink
-              key={index}
-              to={item.href.startsWith("/") ? item.href : `/${item.href}`}
-              className={({ isActive }) =>
-                `${item.className} nav-link${isActive ? " active" : ""}`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          {filteredItems.map((item, index) =>
+            item.onClick ? (
+              <Nav.Link
+                key={index}
+                onClick={item.onClick}
+                className={`${item.className} nav-link`}
+                style={{ cursor: "pointer" }}
+              >
+                {item.label}
+              </Nav.Link>
+            ) : (
+              <NavLink
+                key={index}
+                to={item.href.startsWith("/") ? item.href : `/${item.href}`}
+                className={({ isActive }) =>
+                  `${item.className} nav-link${isActive ? " active" : ""}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            )
+          )}
         </Nav>
       </div>
 

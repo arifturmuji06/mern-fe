@@ -1,11 +1,11 @@
 import React from "react";
 
-const Nutrition = () => {
+const DetailRemunerasi = () => {
   return (
     <div className="content-container">
-      <p>Nutrition</p>
+      <p>Detail Remunerasi</p>
     </div>
   );
 };
 
-export default Nutrition;
+export default DetailRemunerasi;

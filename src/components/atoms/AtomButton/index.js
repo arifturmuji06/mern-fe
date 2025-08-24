@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Button from "react-bootstrap/Button";
 import { Link } from "react-router-dom";
 import Icon from "../../../assets/icon/Index";
@@ -9,12 +9,34 @@ const AtomButton = ({
   type = "button",
   to,
   onClick,
+  onEnterPress,
   variant = "primary",
   className = "",
   icon,
   iconPosition = "start",
   ...rest
 }) => {
+  const buttonRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter" && onEnterPress) {
+        onEnterPress(e);
+      }
+    };
+
+    const node = buttonRef.current;
+    if (node) {
+      node.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      if (node) {
+        node.removeEventListener("keydown", handleKeyDown);
+      }
+    };
+  }, [onEnterPress]);
+
   const content = (
     <>
       {icon && iconPosition === "start" && (
@@ -46,6 +68,7 @@ const AtomButton = ({
       variant={variant}
       onClick={onClick}
       className={className}
+      ref={buttonRef}
       {...rest}
     >
       {content}

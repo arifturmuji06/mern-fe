@@ -1,97 +1,114 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
-import Profile from "../Profile";
-import Employee from "../Employee";
-import Remunerasi from "../Remunerasi";
-import Book from "../Book";
-import Conference from "../Conference";
-import Nutrition from "../Nutrition";
-import History from "../History";
+import { useAuth } from "../../contexts/AuthContext";
+import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import Home from "../Home";
 import { CompanyLogo } from "../../assets";
-// import { Gap } from "../../components";
-// import { Container, Row, Col, Button, Table, Dropdown } from "react-bootstrap";
 import Sidebar from "../../components/layouts/Sidebar/sidebar";
 import "./mainApp.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
-import AddRemunerasi from "../AddRemunerasi";
-import AddEmployee from "../AddEmployee";
 
 const MainApp = () => {
   const location = useLocation();
+  const { logout, user } = useAuth();
 
-  // Check if current page is 'remunerasi'
-  // const isOnRemunerasiPage = location.pathname === "/remunerasi";
-  const isOnRemunerasiPage = [
+  const remunerasiPaths = [
     "/remunerasi",
-    "/remunerasi-book",
-    "/remunerasi-conference",
-    "/remunerasi-nutrition",
     "/remunerasi-history",
     "/remunerasi-add",
-  ].some((path) => location.pathname.startsWith(path));
-
-  // Always visible sidebar items
-  const topSidebarItems = [
-    { label: "Home", href: "/", className: "sidebar-link" },
-    { label: "Profile", href: "/profile", className: "sidebar-link" },
-    { label: "User List", href: "/employee", className: "sidebar-link" },
-    { label: "Remunerasi", href: "/remunerasi", className: "sidebar-link" },
+    "/remunerasi/detail/",
   ];
+
+  const isOnRemunerasiPage = remunerasiPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
+  const isOnEmployeeList = location.pathname === "/employee";
+  const isOnEmployeeAdd = location.pathname === "/employee-add";
+  const isOnEmployeeEdit = location.pathname.startsWith("/employee/");
+
+  const topSidebarItems = [
+    { label: "Home", href: "/", role: "admin", className: "sidebar-link" },
+    {
+      label: "Profile",
+      href: "/profile",
+      role: "karyawan",
+      className: "sidebar-link",
+    },
+    {
+      label: "User List",
+      href: "/employee",
+      role: "admin",
+      className: "sidebar-link",
+    },
+    {
+      label: "Remunerasi",
+      href: "/remunerasi",
+      role: "all",
+      className: "sidebar-link",
+    },
+  ];
+
+  const conditionalItems = isOnRemunerasiPage
+    ? [
+        {
+          label: "History",
+          href: "/remunerasi-history",
+          role: "all",
+          className: "sidebar-link-sub",
+        },
+        {
+          label: "Tambah Remunerasi",
+          href: "/remunerasi-add",
+          role: "admin",
+          className: "sidebar-link-sub",
+        },
+      ]
+    : [];
 
   const botSidebarItems = [
-    // { label: "Settings", href: "#settings", className: "sidebar-link" },
-    { label: "Logout", href: "/login", className: "sidebar-link" },
-  ];
-
-  // Only visible on /remunerasi page
-  const conditionalItems = [
-    { label: "Book", href: "/remunerasi-book", className: "sidebar-link-sub" },
     {
-      label: "Conference",
-      href: "/remunerasi-conference",
-      className: "sidebar-link-sub",
-    },
-    {
-      label: "Nutrition",
-      href: "/remunerasi-nutrition",
-      className: "sidebar-link-sub",
-    },
-    {
-      label: "History",
-      href: "/remunerasi-history",
-      className: "sidebar-link-sub",
-    },
-    {
-      label: "Tambah Remunerasi",
-      href: "/remunerasi-add",
-      className: "sidebar-link-sub",
+      label: "Logout",
+      onClick: logout,
+      role: "all",
+      className: "sidebar-link",
     },
   ];
 
-  const finalSidebarItems = isOnRemunerasiPage
-    ? [...topSidebarItems, ...conditionalItems, ...botSidebarItems]
-    : [...topSidebarItems, ...botSidebarItems];
+  const finalSidebarItems = topSidebarItems.reduce((acc, item) => {
+    acc.push(item);
+
+    if (
+      item.href === "/employee" &&
+      user?.role === "admin" &&
+      (isOnEmployeeList || isOnEmployeeAdd || isOnEmployeeEdit)
+    ) {
+      acc.push({
+        label: "Register Karyawan",
+        href: "/employee-add",
+        role: "admin",
+        className: "sidebar-link-sub",
+      });
+    }
+
+    return acc;
+  }, []);
+
+  if (isOnRemunerasiPage) {
+    finalSidebarItems.push(...conditionalItems);
+  }
+  finalSidebarItems.push(...botSidebarItems);
 
   return (
     <div className="dashboard-container">
       <Sidebar
         items={finalSidebarItems}
-        CompanyLogo={CompanyLogo} // Ganti dengan URL logo Anda
-        copyrightText="© 2024 Your Website"
+        CompanyLogo={CompanyLogo}
+        copyrightText="© 2025 Tim Kukis Studio"
       />
       <Routes>
-        <Route path="profile" element={<Profile />} />
-        <Route path="employee" element={<Employee />} />
-        <Route path="employee-add" element={<AddEmployee />} />
-        <Route path="remunerasi" element={<Remunerasi />} />
-        <Route path="remunerasi-book" element={<Book />} />
-        <Route path="remunerasi-conference" element={<Conference />} />
-        <Route path="remunerasi-nutrition" element={<Nutrition />} />
-        <Route path="remunerasi-history" element={<History />} />
-        <Route path="remunerasi-add" element={<AddRemunerasi />} />
         <Route path="/" element={<Home />} />
       </Routes>
+      <Outlet />
     </div>
   );
 };

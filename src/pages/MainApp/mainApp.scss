@@ -101,3 +101,23 @@ td.devider {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Shadow untuk efek mengangkat */
 }
 
+.inline-format {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0 !important;
+  margin-right: 1rem !important;
+
+  label {
+    margin: 0;
+    font-weight: 500;
+    white-space: nowrap; 
+  }
+
+  select {
+    flex: 1; 
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+

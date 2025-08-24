@@ -4,12 +4,12 @@ import Register from "./Register";
 import Profile from "./Profile";
 import Employee from "./Employee";
 import Remunerasi from "./Remunerasi";
-import Book from "./Book";
-import Conference from "./Conference";
-import Nutrition from "./Nutrition";
+import DetailRemunerasi from "./DetailRemunerasi";
 import History from "./History";
 import AddRemunerasi from "./AddRemunerasi";
 import AddEmployee from "./AddEmployee";
+import EditEmployee from "./EditEmployee";
+import EditRemunerasi from "./EditRemunerasi";
 import MainApp from "./MainApp";
 
 export {
@@ -19,11 +19,11 @@ export {
   Profile,
   Employee,
   Remunerasi,
-  Book,
-  Conference,
-  Nutrition,
+  DetailRemunerasi,
   History,
   AddRemunerasi,
   AddEmployee,
+  EditEmployee,
+  EditRemunerasi,
   MainApp,
 };

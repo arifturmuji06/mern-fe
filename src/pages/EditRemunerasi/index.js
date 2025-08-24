@@ -7,42 +7,17 @@ import {
   AtomSelect,
 } from "../../components";
 import { Form, Row, Col, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { fetchDaftarKaryawanActive } from "../../services/Api";
+import { fetchDaftarKaryawanActive, fetchRemunById } from "../../services/Api";
 
-const AddRemunerasi = () => {
+const EditRemunerasi = () => {
   const { user, token, loading } = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [karyawan, setKaryawan] = useState([]);
-
-  useEffect(() => {
-    if (loading) return;
-
-    if (user?.role !== "admin") {
-      navigate("/profile", { replace: true });
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        const [karyawanRes] = await Promise.all([fetchDaftarKaryawanActive()]);
-        setKaryawan(karyawanRes.data.data);
-      } catch (err) {
-        console.error("Gagal mengambil data dashboard:", err);
-      }
-    };
-
-    fetchData();
-  }, [loading, user, navigate]);
-
-  const activeKaryawan = karyawan.map((item) => ({
-    ...item,
-    value: item._id,
-    label: item.nama,
-  }));
-
+  const [pemohonLama, setPemohonLama] = useState(null);
   const [formData, setFormData] = useState({
     namaProduk: "",
     harga: 0,
@@ -50,13 +25,59 @@ const AddRemunerasi = () => {
     kategori: "",
     tanggal: "",
     deskripsi: "",
-    status: "reimbursement process",
     gambarProduk: null,
     struk: null,
     proposal: null,
+    periode: "",
   });
-
   const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) return;
+
+    if (user?.role !== "admin") {
+      navigate("/remunerasi", { replace: true });
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const karyawanRes = await fetchDaftarKaryawanActive();
+        const remunByIdRes = await fetchRemunById(id);
+
+        setKaryawan(karyawanRes.data.data);
+
+        const remun = remunByIdRes.data.data;
+
+        setFormData({
+          namaProduk: remun.nama || "",
+          harga: remun.jumlah || 0,
+          pemohon: remun.pemohon?._id || "",
+          kategori: remun.jenis || "",
+          tanggal: remun.tanggalPembelian
+            ? remun.tanggalPembelian.split("T")[0]
+            : "",
+          deskripsi: remun.keterangan || "",
+          gambarProduk: null,
+          struk: null,
+          proposal: null,
+          periode: remun.periode,
+        });
+        setPemohonLama(remun.pemohon?.nama || null);
+      } catch (err) {
+        console.error("Gagal mengambil data remunerasi:", err);
+      }
+    };
+
+    fetchData();
+  }, [loading, user, navigate, id]);
+
+  const activeKaryawan = karyawan.map((item) => ({
+    ...item,
+    value: item._id,
+    label: item.nama,
+  }));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,13 +104,12 @@ const AddRemunerasi = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
 
     try {
       const data = new FormData();
       data.append("nama", formData.namaProduk);
       data.append("jumlah", formData.harga);
-      data.append("periode", new Date().getFullYear());
+      data.append("periode", formData.periode);
       data.append("jenis", formData.kategori);
       data.append("tanggalPembelian", formData.tanggal);
       data.append("keterangan", formData.deskripsi);
@@ -106,9 +126,9 @@ const AddRemunerasi = () => {
       }
 
       const res = await fetch(
-        "https://remunerasi-api.onrender.com/v1/remunerasi",
+        `https://remunerasi-api.onrender.com/v1/remunerasi/${id}`,
         {
-          method: "POST",
+          method: "PATCH",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -119,9 +139,8 @@ const AddRemunerasi = () => {
       const resData = await res.json();
 
       if (!res.ok)
-        throw new Error(resData.message || "Gagal membuat remunerasi");
+        throw new Error(resData.message || "Gagal mengupdate remunerasi");
 
-      // Show success alert
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
@@ -136,7 +155,7 @@ const AddRemunerasi = () => {
   return (
     <div className="content-container">
       <div className="mutasi-container">
-        <h2>Tambah Data Remunerasi</h2>
+        <h2>Rubah Data Remunerasi</h2>
         <AtomButton
           to="/remunerasi"
           icon="SquareArrowLeft"
@@ -147,14 +166,11 @@ const AddRemunerasi = () => {
 
         <Gap height={20} />
 
-        {showAlert && (
-          <Alert variant="success">🎉 Data berhasil ditambahkan!</Alert>
-        )}
+        {showAlert && <Alert variant="success">🎉 Data berhasil diubah!</Alert>}
 
         <Form onSubmit={handleSubmit}>
           <Input
             label="Nama Produk"
-            placeholder="Nama Produk"
             value={formData.namaProduk}
             name="namaProduk"
             onChange={handleChange}
@@ -162,7 +178,7 @@ const AddRemunerasi = () => {
 
           <Row>
             <Col md={6}>
-              <HargaInput onChange={handleHargaChange} />
+              <HargaInput value={formData.harga} onChange={handleHargaChange} />
             </Col>
             <Col md={6}>
               <AtomSelect
@@ -171,7 +187,12 @@ const AddRemunerasi = () => {
                 value={formData.pemohon}
                 onChange={handleChange}
                 options={[
-                  { value: "", label: "##Pemohon##" },
+                  pemohonLama
+                    ? {
+                        value: formData.pemohon,
+                        label: `Pemohon lama: ${pemohonLama}`,
+                      }
+                    : { value: "", label: "Pilih Pemohon" },
                   ...activeKaryawan,
                 ]}
               />
@@ -254,16 +275,10 @@ const AddRemunerasi = () => {
             />
           </Form.Group>
 
-          <Form.Control
-            type="hidden"
-            value="reimbursement process"
-            name="status"
-          />
-
           <Gap height={30} />
 
           <div className="d-flex justify-content-center">
-            <AtomButton label="Tambah Data" type="submit" />
+            <AtomButton label="Update Data" type="submit" />
           </div>
         </Form>
       </div>
@@ -271,4 +286,4 @@ const AddRemunerasi = () => {
   );
 };
 
-export default AddRemunerasi;
+export default EditRemunerasi;
