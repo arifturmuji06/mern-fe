@@ -20,11 +20,6 @@ const AddRemunerasi = () => {
   useEffect(() => {
     if (loading) return;
 
-    if (user?.role !== "admin") {
-      navigate("/profile", { replace: true });
-      return;
-    }
-
     const fetchData = async () => {
       try {
         const [karyawanRes] = await Promise.all([fetchDaftarKaryawanActive()]);
@@ -42,7 +37,6 @@ const AddRemunerasi = () => {
     value: item._id,
     label: item.nama,
   }));
-
   const [formData, setFormData] = useState({
     namaProduk: "",
     harga: 0,
@@ -55,6 +49,12 @@ const AddRemunerasi = () => {
     struk: null,
     proposal: null,
   });
+
+  useEffect(() => {
+    if (user?.role === "karyawan") {
+      setFormData((prev) => ({ ...prev, pemohon: user._id || user.id }));
+    }
+  }, [user]);
 
   const [showAlert, setShowAlert] = useState(false);
 
@@ -165,16 +165,30 @@ const AddRemunerasi = () => {
               <HargaInput onChange={handleHargaChange} />
             </Col>
             <Col md={6}>
-              <AtomSelect
-                label="Pemohon"
-                name="pemohon"
-                value={formData.pemohon}
-                onChange={handleChange}
-                options={[
-                  { value: "", label: "##Pemohon##" },
-                  ...activeKaryawan,
-                ]}
-              />
+              {user?.role === "karyawan" ? (
+                <>
+                  <Form.Group>
+                    <Form.Label>Pemohon</Form.Label>
+                    <Form.Control type="text" value={user?.nama} disabled />
+                  </Form.Group>
+                  <input
+                    type="hidden"
+                    name="pemohon"
+                    value={user?._id || user?.id}
+                  />
+                </>
+              ) : (
+                <AtomSelect
+                  label="Pemohon"
+                  name="pemohon"
+                  value={formData.pemohon}
+                  onChange={handleChange}
+                  options={[
+                    { value: "", label: "##Pemohon##" },
+                    ...activeKaryawan,
+                  ]}
+                />
+              )}
             </Col>
           </Row>
           <Row>

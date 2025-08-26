@@ -31,15 +31,15 @@ const EditRemunerasi = () => {
     periode: "",
   });
   const [showAlert, setShowAlert] = useState(false);
+  useEffect(() => {
+    if (user?.role === "karyawan") {
+      setFormData((prev) => ({ ...prev, pemohon: user._id || user.id }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (loading) return;
     if (!user) return;
-
-    if (user?.role !== "admin") {
-      navigate("/remunerasi", { replace: true });
-      return;
-    }
 
     const fetchData = async () => {
       try {
@@ -181,21 +181,35 @@ const EditRemunerasi = () => {
               <HargaInput value={formData.harga} onChange={handleHargaChange} />
             </Col>
             <Col md={6}>
-              <AtomSelect
-                label="Pemohon"
-                name="pemohon"
-                value={formData.pemohon}
-                onChange={handleChange}
-                options={[
-                  pemohonLama
-                    ? {
-                        value: formData.pemohon,
-                        label: `Pemohon lama: ${pemohonLama}`,
-                      }
-                    : { value: "", label: "Pilih Pemohon" },
-                  ...activeKaryawan,
-                ]}
-              />
+              {user?.role === "karyawan" ? (
+                <>
+                  <Form.Group>
+                    <Form.Label>Pemohon</Form.Label>
+                    <Form.Control type="text" value={user?.nama} disabled />
+                  </Form.Group>
+                  <input
+                    type="hidden"
+                    name="pemohon"
+                    value={user?._id || user?.id}
+                  />
+                </>
+              ) : (
+                <AtomSelect
+                  label="Pemohon"
+                  name="pemohon"
+                  value={formData.pemohon}
+                  onChange={handleChange}
+                  options={[
+                    pemohonLama
+                      ? {
+                          value: formData.pemohon,
+                          label: `Pemohon lama: ${pemohonLama}`,
+                        }
+                      : { value: "", label: "Pilih Pemohon" },
+                    ...activeKaryawan,
+                  ]}
+                />
+              )}
             </Col>
           </Row>
           <Row>

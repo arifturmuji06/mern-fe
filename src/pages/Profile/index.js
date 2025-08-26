@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Gap } from "../../components";
-import { Row, Col, Button, Pagination, Image } from "react-bootstrap";
+import { Gap, AtomSelect, ExportButtons } from "../../components";
+import { Row, Col, Button, Pagination, Image, Modal } from "react-bootstrap";
 import "./profile.scss";
 import Icon from "../../assets/icon/Index";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -21,6 +21,13 @@ const Profile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [show, setShow] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedFormat, setSelectedFormat] = useState("pdf");
+  const yearOptions = Array.from({ length: 5 }, (_, i) => {
+    const year = new Date().getFullYear() - i;
+    return { value: year, label: year };
+  });
   const [cardSummary, setCardSummary] = useState(null);
   const [remunTerbaru, setRemunTerbaru] = useState([]);
   const [dataUser, setDataUser] = useState([]);
@@ -106,6 +113,10 @@ const Profile = () => {
     pemohon: item.pemohon || "-",
     gambar: item.gambar,
   }));
+
+  // Handle Modal
+  const exportRemunClose = () => setShow(false);
+  const exportRemunShow = () => setShow(true);
 
   if (loading) return null;
 
@@ -381,6 +392,7 @@ const Profile = () => {
             <h4 className="mb-4">Akses Cepat</h4>
             <div className="align-items-center justify-content download-section">
               <Button
+                href="/remunerasi-add"
                 variant="secondary"
                 className="d-flex align-items-center mb-2 akses-cepat"
               >
@@ -390,6 +402,7 @@ const Profile = () => {
               <Button
                 variant="secondary"
                 className="d-flex align-items-center mb-2 akses-cepat"
+                onClick={exportRemunShow}
               >
                 <Icon name="Download" size="16" className="me-2" /> Unduh
                 Riwayat Remunerasi
@@ -399,6 +412,40 @@ const Profile = () => {
         </Col>
       </Row>
       <Gap height={20} />
+      <Modal show={show} onHide={exportRemunClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Unduh Riwayat Remunerasi</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <AtomSelect
+            label="Pilih Tahun"
+            name="tahun"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            options={yearOptions}
+          />
+          <AtomSelect
+            label="Pilih Format"
+            name="format"
+            value={selectedFormat}
+            onChange={(e) => setSelectedFormat(e.target.value)}
+            options={[
+              { value: "pdf", label: "PDF" },
+              { value: "excel", label: "Excel" },
+            ]}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={exportRemunClose}>
+            Batal
+          </Button>
+          <ExportButtons
+            periode={selectedYear}
+            tipe="remunerasi"
+            format={selectedFormat}
+          />
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

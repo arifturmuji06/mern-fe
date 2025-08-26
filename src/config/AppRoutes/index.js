@@ -73,22 +73,8 @@ const AppRoutes = () => {
                 </AdminRoute>
               }
             />
-            <Route
-              path="remunerasi-add"
-              element={
-                <AdminRoute>
-                  <AddRemunerasi />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="remunerasi/:id"
-              element={
-                <AdminRoute>
-                  <EditRemunerasi />
-                </AdminRoute>
-              }
-            />
+            <Route path="remunerasi-add" element={<AddRemunerasi />} />
+            <Route path="remunerasi/:id" element={<EditRemunerasi />} />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:id" element={<Profile />} />
             <Route path="remunerasi" element={<Remunerasi />} />
