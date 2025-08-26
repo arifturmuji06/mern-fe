@@ -26,7 +26,11 @@ const Home = () => {
   const [pastYear, setPastYear] = useState(2023);
   const [syncError, setSyncError] = useState([]);
 
-  const [show, setShow] = useState(false);
+  // state modal terpisah
+  const [showGenerate, setShowGenerate] = useState(false);
+  const [showRemun, setShowRemun] = useState(false);
+  const [showAnggaran, setShowAnggaran] = useState(false);
+
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedFormat, setSelectedFormat] = useState("pdf");
   const yearOptions = Array.from({ length: 5 }, (_, i) => {
@@ -97,11 +101,7 @@ const Home = () => {
       totalPenggunaanAnggaran,
       saldoRiilAwalPeriode,
       saldoRiilAkhirPeriode,
-      perKategori: {
-        totalPenggunaan = {},
-        totalSisa = {},
-        // totalAlokasi = {},
-      } = {},
+      perKategori: { totalPenggunaan = {}, totalSisa = {} } = {},
     } = {},
   } = cardSummary || {};
 
@@ -151,18 +151,10 @@ const Home = () => {
     return <Navigate to="/profile" replace />;
   }
 
-  // Handle Modal
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const exportRemunClose = () => setShow(false);
-  const exportRemunShow = () => setShow(true);
-  const exportAnggaranClose = () => setShow(false);
-  const exportAnggaranShow = () => setShow(true);
-
   // Generate Anggaran
   const handleGenerateAnggaran = async () => {
     try {
-      const token = localStorage.getItem("token"); // ambil JWT
+      const token = localStorage.getItem("token");
       if (!token) {
         alert("Token tidak ditemukan. Silakan login ulang.");
         return;
@@ -170,7 +162,7 @@ const Home = () => {
 
       const res = await axios.post(
         `https://remunerasi-api.onrender.com/v1/anggaran/generate-all?tahun=${selectedYear}`,
-        {}, // body kosong
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -178,11 +170,9 @@ const Home = () => {
         }
       );
 
-      console.log(selectedYear);
-
       alert(res.data.message || "Anggaran berhasil digenerate!");
-      handleClose(); // tutup modal
-      window.location.reload(); // reload halaman
+      setShowGenerate(false);
+      window.location.reload();
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Gagal generate anggaran.");
@@ -608,7 +598,7 @@ const Home = () => {
               <Button
                 variant="secondary"
                 className="d-flex align-items-center mb-2 akses-cepat"
-                onClick={handleShow}
+                onClick={() => setShowGenerate(true)}
               >
                 <Icon name="Plus" size="16" className="me-2" /> Generate
                 Anggaran
@@ -616,7 +606,7 @@ const Home = () => {
               <Button
                 variant="secondary"
                 className="d-flex align-items-center mb-2 akses-cepat"
-                onClick={exportRemunShow}
+                onClick={() => setShowRemun(true)}
               >
                 <Icon name="Download" size="16" className="me-2" /> Unduh
                 Riwayat Remunerasi
@@ -624,7 +614,7 @@ const Home = () => {
               <Button
                 variant="secondary"
                 className="d-flex align-items-center mb-2 akses-cepat"
-                onClick={exportAnggaranShow}
+                onClick={() => setShowAnggaran(true)}
               >
                 <Icon name="Download" size="16" className="me-2" /> Unduh
                 Riwayat Anggaran
@@ -634,7 +624,8 @@ const Home = () => {
         </Col>
       </Row>
       <Gap height={20} />
-      <Modal show={show} onHide={handleClose}>
+      {/* Modal Generate Anggaran */}
+      <Modal show={showGenerate} onHide={() => setShowGenerate(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Generate Anggaran</Modal.Title>
         </Modal.Header>
@@ -648,7 +639,7 @@ const Home = () => {
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={() => setShowGenerate(false)}>
             Batal
           </Button>
           <Button variant="primary" onClick={handleGenerateAnggaran}>
@@ -656,7 +647,9 @@ const Home = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-      <Modal show={show} onHide={exportRemunClose}>
+
+      {/* Modal Unduh Remunerasi */}
+      <Modal show={showRemun} onHide={() => setShowRemun(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Unduh Riwayat Remunerasi</Modal.Title>
         </Modal.Header>
@@ -680,7 +673,7 @@ const Home = () => {
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={exportRemunClose}>
+          <Button variant="secondary" onClick={() => setShowRemun(false)}>
             Batal
           </Button>
           <ExportButtons
@@ -690,7 +683,9 @@ const Home = () => {
           />
         </Modal.Footer>
       </Modal>
-      <Modal show={show} onHide={exportAnggaranClose}>
+
+      {/* Modal Unduh Anggaran */}
+      <Modal show={showAnggaran} onHide={() => setShowAnggaran(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Unduh Riwayat Anggaran</Modal.Title>
         </Modal.Header>
@@ -714,7 +709,7 @@ const Home = () => {
           />
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={exportAnggaranClose}>
+          <Button variant="secondary" onClick={() => setShowAnggaran(false)}>
             Batal
           </Button>
           <ExportButtons
